@@ -14,8 +14,8 @@ endif
 ifndef TOPDIR
 export TOPDIR		:= $(shell cd ../../ && pwd)
 export TOPSRC		= $(TOPDIR)/Source
-export TARGETDIR	= $(TOPDIR)/Bin/Pandora
-export OBJSDIR		= $(TOPDIR)/Obj/Pandora/$(GCCVER)/$(BUILD)
+export TARGETDIR	= $(TOPDIR)/Bin/$(PLATFORM)/$(ARCH)/$(BITSIZE)
+export OBJSDIR		= $(TOPDIR)/Obj/$(PLATFORM)/$(GCCVER)/$(BUILD)
 endif
 SOURCEDIR	= Source ../Common/Source ../Common/Source/OGLES2
 
@@ -26,8 +26,9 @@ TOOL_PREFIX = pandora-
 
 BUILD_PLATFORM	= PANDORA
 PLATFORM		= Pandora
-ARCH			= ARM
-BITTYPE			= 32
+BUILD_ARCH		= ARM
+ARCH			= arm
+BITSIZE			= 32
 
 GCCVER	= $(shell $(CPP) -dumpversion)
 
@@ -35,11 +36,12 @@ BUILD_TYPE := debug
 
 CPP = $(TOOL_PREFIX)g++
 
-CPPFLAGS	=	-c -DBUILD_$(BUILD_DEF) -DPLATFORM_$(BUILD_PLATFORM) \
-				-DPLATFORM_$(BUILD_PLATFORM)_$(ARCH) \
-				-DPLATFORM_$(BUILD_PLATFORM)_$(ARCH)_$(BITTYPE) \
-				-DBITSIZE_$(BITTYPE) -DARCH_$(ARCH) -DSUPPORT_X11 \
-				-I$(TOPSRC)/Pandora/Headers -I$(TOPSRC)/Common/Headers
+CPPFLAGS	=	-c -DZED_BUILD_$(BUILD_DEF) -DZED_PLATFORM_$(BUILD_PLATFORM) \
+				-DZED_PLATFORM_$(BUILD_PLATFORM)_$(BUILD_ARCH) \
+				-DZED_PLATFORM_$(BUILD_PLATFORM)_$(BUILD_ARCH)_$(BITSIZE) \
+				-DZED_BITSIZE_$(BITSIZE) -DZED_ARCH_$(BUILD_ARCH) \
+				-DSUPPORT_X11 -I$(TOPSRC)/Pandora/Headers \
+				-I$(TOPSRC)/Common/Headers
 CPPFLAGS_EXT=	-ffriend-injection -std=c++0x -mcpu=cortex-a8 \
 				-Wa,-mcpu=cortex-a8 -mfpu=neon -Wa,-mfpu=neon \
 				-mfloat-abi=softfp
@@ -153,12 +155,20 @@ $(TARGET): $(OBJS)
 
 endif
 
-.PHONY: clean
+.PHONY: clean completeclean
 clean:
 	@printf "Removing files from: $(TARGETDIR)... "
 	@cd $(TARGETDIR) && rm -f ./*
 	@printf "[OK]\n"
 	@printf "Removing files from: $(OBJSDIR)... "
 	@cd $(OBJSDIR) && rm -rf ./*
+	@printf "[OK]\n"
+
+completeclean:
+	@printf "Removing files from: $(TOPDIR)/Bin... "
+	@rm -rf $(TOPDIR)/Bin
+	@printf "[OK]\n"
+	@printf "Removing files from: $(TOPDIR)/Obj... "
+	@rm -rf $(TOPDIR)/Obj
 	@printf "[OK]\n"
 
