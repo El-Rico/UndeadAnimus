@@ -13,6 +13,8 @@ Profile
 profile
 ipch
 Data
+gen
+Gen
 
 # Complied #
 *.obj
@@ -28,6 +30,7 @@ Data
 *.opensdf
 *.aps
 *.pch
+local.properties
 
 # Temporary Vim #
 *.swp
@@ -44,3 +47,4 @@ Data
 
 # Git version header #
 GitVersion.hpp
+
