@@ -130,6 +130,12 @@ namespace UndeadAnimus
 		XEvent Events;
 		KeySym Key;
 		ZED::System::ZED_WINDOWDATA WinData = m_pWindow->WindowData( );
+		ZED_UINT64 ElapsedTime = 0ULL;
+		ZED_UINT64 TimeStep = 16667ULL;
+		ZED_UINT64 OldTime = ZED::System::GetTimeMiS( );
+		ZED_UINT64 FrameTime = ZED::System::GetTimeMiS( );
+		ZED_MEMSIZE FrameRate = 0;
+		ZED_UINT64 Accumulator = 0ULL;
 
 		while( m_Running == ZED_TRUE )
 		{
@@ -171,7 +177,34 @@ namespace UndeadAnimus
 				}
 			}
 
+			const ZED_UINT64 NewTime = ZED::System::GetTimeMiS( );
+			ZED_UINT64 DeltaTime = NewTime - OldTime;
+
+			if( DeltaTime > 250000ULL )
+			{
+				DeltaTime = 250000ULL;
+			}
+
+			OldTime = NewTime;
+
+			Accumulator += DeltaTime;
+
+			while( Accumulator >= TimeStep )
+			{
+				this->Update( 0.0f );
+				ElapsedTime += TimeStep;
+				Accumulator -= TimeStep;
+			}
+
 			this->Render( );
+			++FrameRate;
+
+			if( ( NewTime - FrameTime ) >= 1000000ULL )
+			{
+				zedTrace( "FPS: %d\n", FrameRate );
+				FrameTime = ZED::System::GetTimeMiS( );
+				FrameRate = 0;
+			}
 		}
 
 		return ZED_OK;
