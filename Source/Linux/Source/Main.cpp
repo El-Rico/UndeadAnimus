@@ -1,6 +1,6 @@
 #include <GitVersion.hpp>
 #include <Game.hpp>
-#include <Debugger.hpp>
+#include <System/Debugger.hpp>
 #include <cstdio>
 
 #ifdef ZED_BUILD_DEBUG
