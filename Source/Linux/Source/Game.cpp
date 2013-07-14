@@ -1,4 +1,8 @@
 #include <Game.hpp>
+#include <Renderer/LinuxRendererOGL3.hpp>
+#include <System/LinuxInputManager.hpp>
+#include <System/LinuxWindow.hpp>
+#include <System/Time.hpp>
 
 namespace UndeadAnimus
 {
@@ -35,6 +39,79 @@ namespace UndeadAnimus
 
 	ZED_UINT32 Game::Initialise( )
 	{
+		ZED_UINT32 X = 0, Y = 0, Width = 0, Height = 0;
+		ZED::System::ZED_SCREENSIZE NativeSize;
+		ZED::System::ZED_SCREENSIZE *pScreenSizes = ZED_NULL;
+		ZED_MEMSIZE ScreenSizeCount = 0;
+
+		m_pRenderer = new ZED::Renderer::LinuxRendererOGL3( );
+		m_pWindow = new ZED::System::LinuxWindow( );
+
+		ZED::System::EnumerateScreenSizes( &pScreenSizes, &ScreenSizeCount,
+			ZED::System::GetCurrentScreenNumber( ) );
+
+		if( ZED::System::GetNativeScreenSize(
+			ZED::System::GetCurrentScreenNumber( ), NativeSize ) != ZED_OK )
+		{
+			zedTrace( "[UndeadAnimus::Game::Initialise] <ERROR> "
+				"Could not get native screen size\n" );
+
+			return ZED_FAIL;
+		}
+
+		if( m_FullScreen )
+		{
+			X = 0;
+			Y = 0;
+			Width = NativeSize.Width;
+			Height = NativeSize.Height;
+		}
+		else
+		{
+#ifdef ZED_BUILD_DEBUG
+			Width = 1280;
+			Height = 720;
+			X = ( NativeSize.Width / 2 ) - ( Width / 2 );
+			Y = ( NativeSize.Height / 2 ) - ( Height / 2 );
+#else
+#endif
+		}
+
+		m_pWindow->Create( X, Y, Width, Height );
+
+		m_Canvas.Width( Width );
+		m_Canvas.Height( Height );
+
+		m_Canvas.BackBufferCount( 1 );
+		m_Canvas.DepthStencilFormat( ZED_FORMAT_D24S8 );
+		m_Canvas.ColourFormat( ZED_FORMAT_ARGB8 );
+
+		m_pRenderer->Create( m_Canvas, ( *m_pWindow ) );
+		m_pRenderer->ClearColour( 0.2f, 0.0f, 0.0f );
+		
+		ZED::System::StartTime( );
+
+		m_pRenderer->SetRenderState( ZED_RENDERSTATE_CULLMODE,
+			ZED_CULLMODE_CCW );
+		m_pRenderer->SetRenderState( ZED_RENDERSTATE_DEPTH, ZED_ENABLE );
+		m_pRenderer->SetClippingPlanes( 1.0f, 100000.0f );
+		m_pRenderer->PerspectiveProjectionMatrix( 45.0f,
+			static_cast< ZED_FLOAT32 >( Width ) /
+			static_cast< ZED_FLOAT32 >( Height ) );
+
+		ZED::System::ZED_WINDOWDATA WinData = m_pWindow->WindowData( );
+		m_pInputManager =
+			new ZED::System::LinuxInputManager( WinData.pX11Display );
+		m_pInputManager->AddDevice( &m_Keyboard );
+
+		if( pScreenSizes )
+		{
+			delete [ ] pScreenSizes;
+			pScreenSizes = ZED_NULL;
+		}
+
+		m_Running = ZED_TRUE;
+
 		return ZED_OK;
 	}
 
@@ -44,10 +121,59 @@ namespace UndeadAnimus
 
 	void Game::Render( )
 	{
+		m_pRenderer->BeginScene( ZED_TRUE, ZED_TRUE, ZED_TRUE );
+		m_pRenderer->EndScene( );
 	}
 
 	ZED_UINT32 Game::Execute( )
 	{
+		XEvent Events;
+		KeySym Key;
+		ZED::System::ZED_WINDOWDATA WinData = m_pWindow->WindowData( );
+
+		while( m_Running == ZED_TRUE )
+		{
+			m_pInputManager->Update( );
+
+			if( m_Keyboard.IsKeyDown( K_ESCAPE ) )
+			{
+				m_Running = ZED_FALSE;
+			}
+
+			while( XPending( WinData.pX11Display ) > 0 )
+			{
+				XNextEvent( WinData.pX11Display, &Events );
+				switch( Events.type )
+				{
+					case EnterNotify:
+					{
+						XGrabKeyboard( WinData.pX11Display, WinData.X11Window,
+							True, GrabModeAsync, GrabModeAsync, CurrentTime );
+						XGrabPointer( WinData.pX11Display, WinData.X11Window,
+							True, EnterWindowMask | LeaveWindowMask |
+							PointerMotionMask, GrabModeAsync, GrabModeAsync,
+							None, None, CurrentTime );
+						m_pWindow->HideCursor( );
+						break;
+					}
+					case LeaveNotify:
+					{
+						XUngrabPointer( WinData.pX11Display, CurrentTime );
+						XUngrabKeyboard( WinData.pX11Display, CurrentTime );
+						m_pWindow->ShowCursor( );
+
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+			}
+
+			this->Render( );
+		}
+
 		return ZED_OK;
 	}
 }
