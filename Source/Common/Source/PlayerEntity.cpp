@@ -151,17 +151,20 @@ namespace UndeadAnimus
 
 	void PlayerEntity::Update( const ZED_UINT64 p_ElapsedGameEntity )
 	{
+		static ZED_FLOAT32 YRotation = 0.0f;
 		ZED::Arithmetic::Matrix4x4 WVP;
 		ZED::Arithmetic::Matrix4x4 PerspProj;
 		ZED::Arithmetic::Vector3 Position( 0.0f, 0.0f, 10.0f );
 		ZED::Arithmetic::Vector3 Look( 0.0f, 0.0f, 0.0f );
 		ZED::Arithmetic::Vector3 Up( 0.0f, 1.0f, 0.0f );
+		ZED::Arithmetic::Matrix4x4 RotationMatrix;
 
+		RotationMatrix.RotateY( YRotation );
 		m_pRenderer->SetViewLookAt( Position, Look, Up );
 		m_pRenderer->PerspectiveProjectionMatrix( &PerspProj );
 		m_pRenderer->GetWVP( &m_WorldMatrix );
 
-		WVP = PerspProj*m_WorldMatrix;
+		WVP = PerspProj*m_WorldMatrix*RotationMatrix;
 
 		ZED_FLOAT32 Matrix[ 16 ];
 		WVP.AsFloat( Matrix );
@@ -171,6 +174,7 @@ namespace UndeadAnimus
 		m_pShader->SetConstantData( 0, Matrix );
 		m_pShader->SetConstantData( 3, ( void * )( &LightPosition ) );
 		m_pShader->SetConstantData( 4, ( void * )( &Position ) );
+		YRotation += 0.01f;
 	}
 
 	void PlayerEntity::Render( )
