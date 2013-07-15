@@ -38,6 +38,10 @@ local.properties
 *.swn
 *.vim
 
+# Temporary Blender files #
+*.blend*
+!*.blend
+
 # Diffing temporary files #
 *.orig
 
