@@ -3,6 +3,7 @@
 #include <System/LinuxInputManager.hpp>
 #include <System/LinuxWindow.hpp>
 #include <System/Time.hpp>
+#include <System/Memory.hpp>
 
 namespace UndeadAnimus
 {
@@ -14,6 +15,7 @@ namespace UndeadAnimus
 		m_Running = ZED_FALSE;
 		m_pInputManager = ZED_NULL;
 		m_pWindow = ZED_NULL;
+		m_pPlayer = ZED_NULL;
 	}
 
 	Game::~Game( )
@@ -22,6 +24,11 @@ namespace UndeadAnimus
 		{
 			delete m_pInputManager;
 			m_pInputManager = ZED_NULL;
+		}
+
+		if( m_pPlayer )
+		{
+			zedSafeDelete( m_pPlayer );
 		}
 
 		if( m_pRenderer )
@@ -110,7 +117,14 @@ namespace UndeadAnimus
 			pScreenSizes = ZED_NULL;
 		}
 
-		m_Player.Initialise( );
+		m_pPlayer = new PlayerEntity( m_pRenderer );
+
+		if( m_pPlayer->Initialise( ) != ZED_OK )
+		{
+			zedTrace( "[UndeadAnimus::Game::Initialise] <ERROR> "
+				"Something went wrong loading the model file\n" );
+			return ZED_FAIL;
+		}
 
 		m_Running = ZED_TRUE;
 
@@ -119,13 +133,13 @@ namespace UndeadAnimus
 
 	void Game::Update( const ZED_UINT64 p_ElapsedGameTime )
 	{
-		m_Player.Update( p_ElapsedGameTime );
+		m_pPlayer->Update( p_ElapsedGameTime );
 	}
 
 	void Game::Render( )
 	{
 		m_pRenderer->BeginScene( ZED_TRUE, ZED_TRUE, ZED_TRUE );
-		m_Player.Render( );
+		m_pPlayer->Render( );
 		m_pRenderer->EndScene( );
 	}
 

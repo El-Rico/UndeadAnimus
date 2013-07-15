@@ -56,7 +56,7 @@ namespace UndeadAnimus
 		ZED::System::InputManager			*m_pInputManager;
 		ZED::System::Keyboard				m_Keyboard;
 
-		PlayerEntity	m_Player;
+		PlayerEntity	*m_pPlayer;
 	};
 }
 

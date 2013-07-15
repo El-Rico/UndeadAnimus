@@ -3,6 +3,7 @@
 
 #include <System/DataTypes.hpp>
 #include <Arithmetic/Vector3.hpp>
+#include <Renderer/Renderer.hpp>
 
 namespace UndeadAnimus
 {
@@ -32,6 +33,7 @@ namespace UndeadAnimus
 
 		ZED::Arithmetic::Vector3	m_Position;
 		ZED_BOOL					m_Renderable;
+		ZED::Renderer::Renderer		*m_pRenderer;
 	};
 }
 
