@@ -7,6 +7,7 @@
 #include <System/InputManager.hpp>
 #include <System/Keyboard.hpp>
 #include <Renderer/CanvasDescription.hpp>
+#include <PlayerEntity.hpp>
 #include <cstdio>
 
 static const ZED_CHAR8 *g_pWindowTitle =
@@ -54,6 +55,8 @@ namespace UndeadAnimus
 		ZED::System::Window					*m_pWindow;
 		ZED::System::InputManager			*m_pInputManager;
 		ZED::System::Keyboard				m_Keyboard;
+
+		PlayerEntity	m_Player;
 	};
 }
 

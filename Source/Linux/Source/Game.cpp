@@ -110,6 +110,8 @@ namespace UndeadAnimus
 			pScreenSizes = ZED_NULL;
 		}
 
+		m_Player.Initialise( );
+
 		m_Running = ZED_TRUE;
 
 		return ZED_OK;
@@ -117,11 +119,13 @@ namespace UndeadAnimus
 
 	void Game::Update( const ZED_UINT64 p_ElapsedGameTime )
 	{
+		m_Player.Update( p_ElapsedGameTime );
 	}
 
 	void Game::Render( )
 	{
 		m_pRenderer->BeginScene( ZED_TRUE, ZED_TRUE, ZED_TRUE );
+		m_Player.Render( );
 		m_pRenderer->EndScene( );
 	}
 
