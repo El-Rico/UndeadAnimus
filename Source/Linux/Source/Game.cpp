@@ -159,9 +159,32 @@ namespace UndeadAnimus
 		{
 			m_pInputManager->Update( );
 
+			// All of the key checking code needs to be rectified before
+			// getting too deep into gameplay
 			if( m_Keyboard.IsKeyDown( K_ESCAPE ) )
 			{
 				m_Running = ZED_FALSE;
+			}
+			
+			if( m_Keyboard.IsKeyDown( 'w' ) )
+			{
+				m_pPlayer->Move( ZED::Arithmetic::Vector3( 0.0f, 0.0f, 0.1f ) );
+			}
+			if( m_Keyboard.IsKeyDown( 'd' ) )
+			{
+				m_pPlayer->Move( ZED::Arithmetic::Vector3( 0.0f, 0.0f, -0.1f ) );
+			}
+			if( m_Keyboard.IsKeyDown( 's' ) )
+			{
+				m_pPlayer->Move( ZED::Arithmetic::Vector3( -0.1f, 0.0f, 0.0f ) );
+			}
+			if( m_Keyboard.IsKeyDown( 'f' ) )
+			{
+				m_pPlayer->Move( ZED::Arithmetic::Vector3( 0.1f, 0.0f, 0.0f ) );
+			}
+			if( m_Keyboard.IsKeyDown( 'q' ) )
+			{
+				m_pPlayer->Position( ZED::Arithmetic::Vector3( 0.0f, 0.0f, 0.0f ) );
 			}
 
 			while( XPending( WinData.pX11Display ) > 0 )

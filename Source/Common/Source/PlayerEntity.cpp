@@ -15,6 +15,8 @@ namespace UndeadAnimus
 
 		m_pModel = ZED_NULL;
 		m_pShader = ZED_NULL;
+
+		m_CameraYaw = 0.0f;
 	}
 
 	PlayerEntity::~PlayerEntity( )
@@ -158,13 +160,16 @@ namespace UndeadAnimus
 		ZED::Arithmetic::Vector3 Look( 0.0f, 0.0f, 0.0f );
 		ZED::Arithmetic::Vector3 Up( 0.0f, 1.0f, 0.0f );
 		ZED::Arithmetic::Matrix4x4 RotationMatrix;
+		ZED::Arithmetic::Matrix4x4 Translation;
 
 		RotationMatrix.RotateY( YRotation );
 		m_pRenderer->SetViewLookAt( Position, Look, Up );
 		m_pRenderer->PerspectiveProjectionMatrix( &PerspProj );
 		m_pRenderer->GetWVP( &m_WorldMatrix );
 
-		WVP = PerspProj*m_WorldMatrix*RotationMatrix;
+		Translation.Translate( m_Position );
+
+		WVP = PerspProj*m_WorldMatrix*RotationMatrix*Translation;
 
 		ZED_FLOAT32 Matrix[ 16 ];
 		WVP.AsFloat( Matrix );
@@ -174,7 +179,6 @@ namespace UndeadAnimus
 		m_pShader->SetConstantData( 0, Matrix );
 		m_pShader->SetConstantData( 3, ( void * )( &LightPosition ) );
 		m_pShader->SetConstantData( 4, ( void * )( &Position ) );
-		YRotation += 0.01f;
 	}
 
 	void PlayerEntity::Render( )
@@ -190,26 +194,36 @@ namespace UndeadAnimus
 		ZED_FLOAT32 Sin = 0.0f, Cos = 0.0f;
 		ZED::Arithmetic::SinCos( m_CameraYaw, Sin, Cos );
 
+		zedTrace( "Moving: " );
+
 		if( p_Velocity[ 0 ] > ZED_Epsilon )
 		{
+			zedTrace( "Right\n" );
 			m_Position[ 0 ] += Cos * p_Velocity[ 0 ];
 			m_Position[ 2 ] -= Sin * p_Velocity[ 0 ];
 		}
 		if( p_Velocity[ 0 ] < -ZED_Epsilon )
 		{
-			m_Position[ 0 ] -= Cos * p_Velocity[ 0 ];
-			m_Position[ 2 ] += Sin * p_Velocity[ 0 ];
+			zedTrace( "Left\n" );
+			m_Position[ 0 ] -= Cos * -p_Velocity[ 0 ];
+			m_Position[ 2 ] += Sin * -p_Velocity[ 0 ];
 		}
 
 		if( p_Velocity[ 2 ] > ZED_Epsilon )
 		{
+			zedTrace( "Forward\n" );
 			m_Position[ 0 ] -= Sin * p_Velocity[ 2 ];
 			m_Position[ 2 ] -= Cos * p_Velocity[ 2 ];
+
+			zedTrace( "INFO: m_Position: < %f %f %f > | Yaw: %f | Sin: %f | Cos: %f\n",
+				m_Position[ 0 ], m_Position[ 1 ], m_Position[ 2 ],
+				m_CameraYaw, Sin, Cos );
 		}
 		if( p_Velocity[ 2 ] < -ZED_Epsilon )
 		{
-			m_Position[ 0 ] += Sin * p_Velocity[ 2 ];
-			m_Position[ 2 ] += Cos * p_Velocity[ 2 ];
+			zedTrace( "Backward\n" );
+			m_Position[ 0 ] += Sin * -p_Velocity[ 2 ];
+			m_Position[ 2 ] += Cos * -p_Velocity[ 2 ];
 		}
 	}
 }
