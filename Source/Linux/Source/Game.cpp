@@ -165,24 +165,28 @@ namespace UndeadAnimus
 			{
 				m_Running = ZED_FALSE;
 			}
-			
+			if( m_Keyboard.IsKeyDown( K_F11 ) )
+			{
+				// Switch to fullscreen
+			}
+
 			if( m_Keyboard.IsKeyDown( 'w' ) )
 			{
 				m_pPlayer->Move( ZED::Arithmetic::Vector3( 0.0f, 0.0f, 0.1f ) );
 			}
-			if( m_Keyboard.IsKeyDown( 'd' ) )
+			if( m_Keyboard.IsKeyDown( 's' ) )
 			{
 				m_pPlayer->Move( ZED::Arithmetic::Vector3( 0.0f, 0.0f, -0.1f ) );
 			}
-			if( m_Keyboard.IsKeyDown( 's' ) )
+			if( m_Keyboard.IsKeyDown( 'a' ) )
 			{
 				m_pPlayer->Move( ZED::Arithmetic::Vector3( -0.1f, 0.0f, 0.0f ) );
 			}
-			if( m_Keyboard.IsKeyDown( 'f' ) )
+			if( m_Keyboard.IsKeyDown( 'd' ) )
 			{
 				m_pPlayer->Move( ZED::Arithmetic::Vector3( 0.1f, 0.0f, 0.0f ) );
 			}
-			if( m_Keyboard.IsKeyDown( 'q' ) )
+			if( m_Keyboard.IsKeyDown( K_SPACE ) )
 			{
 				m_pPlayer->Position( ZED::Arithmetic::Vector3( 0.0f, 0.0f, 0.0f ) );
 			}

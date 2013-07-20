@@ -194,34 +194,24 @@ namespace UndeadAnimus
 		ZED_FLOAT32 Sin = 0.0f, Cos = 0.0f;
 		ZED::Arithmetic::SinCos( m_CameraYaw, Sin, Cos );
 
-		zedTrace( "Moving: " );
-
 		if( p_Velocity[ 0 ] > ZED_Epsilon )
 		{
-			zedTrace( "Right\n" );
 			m_Position[ 0 ] += Cos * p_Velocity[ 0 ];
 			m_Position[ 2 ] -= Sin * p_Velocity[ 0 ];
 		}
 		if( p_Velocity[ 0 ] < -ZED_Epsilon )
 		{
-			zedTrace( "Left\n" );
 			m_Position[ 0 ] -= Cos * -p_Velocity[ 0 ];
 			m_Position[ 2 ] += Sin * -p_Velocity[ 0 ];
 		}
 
 		if( p_Velocity[ 2 ] > ZED_Epsilon )
 		{
-			zedTrace( "Forward\n" );
 			m_Position[ 0 ] -= Sin * p_Velocity[ 2 ];
 			m_Position[ 2 ] -= Cos * p_Velocity[ 2 ];
-
-			zedTrace( "INFO: m_Position: < %f %f %f > | Yaw: %f | Sin: %f | Cos: %f\n",
-				m_Position[ 0 ], m_Position[ 1 ], m_Position[ 2 ],
-				m_CameraYaw, Sin, Cos );
 		}
 		if( p_Velocity[ 2 ] < -ZED_Epsilon )
 		{
-			zedTrace( "Backward\n" );
 			m_Position[ 0 ] += Sin * -p_Velocity[ 2 ];
 			m_Position[ 2 ] += Cos * -p_Velocity[ 2 ];
 		}
