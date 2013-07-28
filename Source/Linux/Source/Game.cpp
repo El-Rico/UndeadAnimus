@@ -221,22 +221,22 @@ namespace UndeadAnimus
 				if( m_Keyboard.IsKeyDown( 'w' ) )
 				{
 					m_pPlayer->Move(
-						ZED::Arithmetic::Vector3( 0.0f, 0.0f, 0.1f ) );
+						ZED::Arithmetic::Vector3( 0.0f, 0.0f, 1.4f ) );
 				}
 				if( m_Keyboard.IsKeyDown( 's' ) )
 				{
 					m_pPlayer->Move(
-						ZED::Arithmetic::Vector3( 0.0f, 0.0f, -0.1f ) );
+						ZED::Arithmetic::Vector3( 0.0f, 0.0f, -1.4f ) );
 				}
 				if( m_Keyboard.IsKeyDown( 'a' ) )
 				{
 					m_pPlayer->Move(
-						ZED::Arithmetic::Vector3( -0.1f, 0.0f, 0.0f ) );
+						ZED::Arithmetic::Vector3( -1.4f, 0.0f, 0.0f ) );
 				}
 				if( m_Keyboard.IsKeyDown( 'd' ) )
 				{
 					m_pPlayer->Move(
-						ZED::Arithmetic::Vector3( 0.1f, 0.0f, 0.0f ) );
+						ZED::Arithmetic::Vector3( 1.4f, 0.0f, 0.0f ) );
 				}
 				if( m_Keyboard.IsKeyDown( K_SPACE ) )
 				{

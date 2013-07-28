@@ -144,12 +144,15 @@ $(TARGET): $(OBJS)
 	@printf "\n\n%s" "------------------------- MESSAGES FROM THE COMPILER ---"
 	@printf "%s\n" "-----------------------"
 	@cat *.cmsgs
+	@#cat *.cmsgs | sed ''/error/s//`printf "\033[32error\033[0m"`/''
 	@printf "%s" "------------------------------------------------------------"
 	@printf "%s\n\n" "-------------------"
 	@printf "Creating: $(OUTFILE)... "
 	@$(CPP) -o $(OUTFILE) $(LINKFLAGS) -m$(BITSIZE) $(OBJS) $(SYSLPATH) \
 	$(LIBPATH) $(LIBS) $(SYSLIBS) 2> lmsgs;\
 	RETVAL=$$?;\
+	cat lmsgs | sed ''/error/s//`printf "\033[31merror\033[0m"`/'' > lmsgs;\
+	cat lmsgs | sed ''/warning/s//`printf "\034[31mwarning\033[0m"`/'' > lmsgs;\
 	if [[ $$RETVAL == 0 ]]; then\
 		printf "[OK]\n";\
 	else\
@@ -166,6 +169,8 @@ $(TARGET): $(OBJS)
 	@$(CPP) -MMD -MP -MF $*.d $(CPPFLAGS) $(SYSIPATH) $(INCPATH) \
 	$< -o $@ 2> $*.cmsgs;\
 	RETVAL=$$?;\
+	cat $*.cmsgs | sed ''/error/s//`printf "\033[31merror\033[0m"`/'' > $*.cmsgs;\
+	cat $*.cmsgs | sed ''/warning/s//`printf "\033[34mwarning\033[0m"`/'' > $*.cmsgs;\
 	if [[ $$RETVAL == 0 ]]; then\
 		printf "[OK]\n";\
 	else\

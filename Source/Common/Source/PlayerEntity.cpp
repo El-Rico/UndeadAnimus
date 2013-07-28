@@ -6,6 +6,7 @@
 #include <Renderer/OGL/GLModel.hpp>
 #include <Renderer/OGL/GLShader.hpp>
 #endif
+#include <Arithmetic/Vector2.hpp>
 
 namespace UndeadAnimus
 {
@@ -148,6 +149,8 @@ namespace UndeadAnimus
 		m_pShader->SetConstantData( 8, ( void * )( &Specular ) );
 		m_pShader->SetConstantData( 9, ( void * )( &Shininess ) );
 
+		m_CameraPosition.Set( 0.0f, 500.0f, 300.0f );
+
 		return ZED_OK;
 	}
 
@@ -156,14 +159,17 @@ namespace UndeadAnimus
 		static ZED_FLOAT32 YRotation = 0.0f;
 		ZED::Arithmetic::Matrix4x4 WVP;
 		ZED::Arithmetic::Matrix4x4 PerspProj;
-		ZED::Arithmetic::Vector3 Position( 0.0f, 0.0f, 10.0f );
 		ZED::Arithmetic::Vector3 Look( 0.0f, 0.0f, 0.0f );
 		ZED::Arithmetic::Vector3 Up( 0.0f, 1.0f, 0.0f );
 		ZED::Arithmetic::Matrix4x4 RotationMatrix;
 		ZED::Arithmetic::Matrix4x4 Translation;
 
-		RotationMatrix.RotateY( YRotation );
-		m_pRenderer->SetViewLookAt( Position, Look, Up );
+		m_CameraDirection = m_CameraPosition;
+		m_CameraDirection -= m_Position;
+		m_CameraDirection[ 1 ] = 0.0f;
+		m_CameraDirection.Normalise( );
+
+		m_pRenderer->SetViewLookAt( m_CameraPosition, m_Position, Up );
 		m_pRenderer->PerspectiveProjectionMatrix( &PerspProj );
 		m_pRenderer->GetWVP( &m_WorldMatrix );
 
@@ -178,42 +184,56 @@ namespace UndeadAnimus
 		m_pShader->Activate( );
 		m_pShader->SetConstantData( 0, Matrix );
 		m_pShader->SetConstantData( 3, ( void * )( &LightPosition ) );
-		m_pShader->SetConstantData( 4, ( void * )( &Position ) );
+		m_pShader->SetConstantData( 4, ( void * )( &m_CameraPosition ) );
 	}
 
 	void PlayerEntity::Render( )
 	{
-		// There should be some kind of object to represent the player
 		m_pModel->Render( );
 	}
 
 	void PlayerEntity::Move( const ZED::Arithmetic::Vector3 &p_Velocity )
 	{
 		// The player will be moving relative to the camera's orientation
-		// Which will require knowledge of the camera's yaw
-		ZED_FLOAT32 Sin = 0.0f, Cos = 0.0f;
-		ZED::Arithmetic::SinCos( m_CameraYaw, Sin, Cos );
+
+		ZED_FLOAT32 Radius = 40.0f;
 
 		if( p_Velocity[ 0 ] > ZED_Epsilon )
 		{
-			m_Position[ 0 ] += Cos * p_Velocity[ 0 ];
-			m_Position[ 2 ] -= Sin * p_Velocity[ 0 ];
+			m_Position[ 0 ] += m_CameraDirection[ 2 ] * p_Velocity[ 0 ];
+			m_Position[ 2 ] -= m_CameraDirection[ 0 ] * p_Velocity[ 0 ];
 		}
 		if( p_Velocity[ 0 ] < -ZED_Epsilon )
 		{
-			m_Position[ 0 ] -= Cos * -p_Velocity[ 0 ];
-			m_Position[ 2 ] += Sin * -p_Velocity[ 0 ];
+			m_Position[ 0 ] -= m_CameraDirection[ 2 ] * -p_Velocity[ 0 ];
+			m_Position[ 2 ] += m_CameraDirection[ 0 ] * -p_Velocity[ 0 ];
 		}
 
 		if( p_Velocity[ 2 ] > ZED_Epsilon )
 		{
-			m_Position[ 0 ] -= Sin * p_Velocity[ 2 ];
-			m_Position[ 2 ] -= Cos * p_Velocity[ 2 ];
+			m_Position[ 0 ] -= m_CameraDirection[ 0 ] * p_Velocity[ 2 ];
+			m_Position[ 2 ] -= m_CameraDirection[ 2 ] * p_Velocity[ 2 ];
 		}
 		if( p_Velocity[ 2 ] < -ZED_Epsilon )
 		{
-			m_Position[ 0 ] += Sin * -p_Velocity[ 2 ];
-			m_Position[ 2 ] += Cos * -p_Velocity[ 2 ];
+			m_Position[ 0 ] += m_CameraDirection[ 0 ] * -p_Velocity[ 2 ];
+			m_Position[ 2 ] += m_CameraDirection[ 2 ] * -p_Velocity[ 2 ];
+
+		}
+		ZED::Arithmetic::Vector2 DistVector( m_Position[ 0 ],
+			m_Position[ 2 ] );
+		ZED::Arithmetic::Vector2 CameraPosition( m_CameraPosition[ 0 ],
+			m_CameraPosition[ 2 ] );
+		ZED_FLOAT32 Distance = DistVector.Distance( CameraPosition );
+		if( Distance < 40.0f )
+		{
+			ZED::Arithmetic::Vector2 CameraTranslate( m_CameraPosition[ 0 ],
+				m_CameraPosition[ 2 ] );
+			CameraTranslate -= DistVector;
+			CameraTranslate.Normalise( );
+			CameraTranslate *= 80.0f;
+			m_CameraPosition[ 0 ] += CameraTranslate[ 0 ];
+			m_CameraPosition[ 2 ] += CameraTranslate[ 1 ];
 		}
 	}
 }
